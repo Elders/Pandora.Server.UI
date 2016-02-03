@@ -4,7 +4,7 @@ using Microsoft.AspNet.Authorization;
 using Microsoft.AspNet.Http;
 using Microsoft.AspNet.Mvc;
 
-namespace Pandora.Server.UI.Controllers
+namespace Elders.Pandora.Server.UI.Controllers
 {
     [Authorize]
     public class HomeController : Controller

@@ -7,7 +7,7 @@ using Newtonsoft.Json;
 using Elders.Pandora.Server.UI.Common;
 using Elders.Pandora.Server.UI.ViewModels;
 
-namespace Elders.Pandora.UI.Controllers
+namespace Elders.Pandora.Server.UI.Controllers
 {
     [Authorize]
     public class ProjectsController : Controller
@@ -70,7 +70,7 @@ namespace Elders.Pandora.UI.Controllers
                 throw response.ErrorException;
             }
 
-            var configs = JsonConvert.DeserializeObject<List<Server.UI.ViewModels.Configuration>>(response.Content);
+            var configs = JsonConvert.DeserializeObject<List<Server.UI.ViewModels.ConfigurationDTO>>(response.Content);
             return View(configs);
         }
 

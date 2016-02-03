@@ -33,7 +33,7 @@ namespace Elders.Pandora.Server.UI.Controllers
                 throw response.ErrorException;
             }
 
-            var config = JsonConvert.DeserializeObject<Configuration>(response.Content);
+            var config = JsonConvert.DeserializeObject<ConfigurationDTO>(response.Content);
 
             return View(config);
         }
@@ -63,7 +63,7 @@ namespace Elders.Pandora.Server.UI.Controllers
             Elders.Pandora.Server.UI.ViewModels.User.GiveAccess(User, projectName, applicationName, clusterName, Access.WriteAccess);
 
             var config = GetConfig(projectName, applicationName);
-            config.Clusters.Add(new Configuration.ClusterDTO(new Cluster(newCluster.Name, Access.WriteAccess), newCluster.AsDictionary()));
+            config.Clusters.Add(new ConfigurationDTO.ClusterDTO(new Cluster(newCluster.Name, Access.WriteAccess), newCluster.AsDictionary()));
 
             return View(config);
         }
@@ -94,7 +94,7 @@ namespace Elders.Pandora.Server.UI.Controllers
             return RedirectToAction("Index");
         }
 
-        private Configuration GetConfig(string projectName, string applicationName)
+        private ConfigurationDTO GetConfig(string projectName, string applicationName)
         {
             var hostName = ApplicationConfiguration.Get("pandora_api_url");
             var url = hostName + "/api/Configurations/" + projectName + "/" + applicationName;
@@ -111,7 +111,7 @@ namespace Elders.Pandora.Server.UI.Controllers
                 throw response.ErrorException;
             }
 
-            var config = JsonConvert.DeserializeObject<Configuration>(response.Content);
+            var config = JsonConvert.DeserializeObject<ConfigurationDTO>(response.Content);
 
             return config;
         }

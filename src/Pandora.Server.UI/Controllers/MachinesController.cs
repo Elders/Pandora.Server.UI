@@ -21,7 +21,7 @@ namespace Elders.Pandora.Server.UI.Controllers
 
             var config = GetConfig(projectName, applicationName);
 
-            return View(new Tuple<string, Configuration>(clusterName, config));
+            return View(new Tuple<string, ConfigurationDTO>(clusterName, config));
         }
 
         [HttpPost]
@@ -89,7 +89,7 @@ namespace Elders.Pandora.Server.UI.Controllers
 
             var config = GetConfig(projectName, applicationName);
 
-            return View(new Tuple<string, string, Configuration>(clusterName, machineName, config));
+            return View(new Tuple<string, string, ConfigurationDTO>(clusterName, machineName, config));
         }
 
         [HttpPost]
@@ -119,7 +119,7 @@ namespace Elders.Pandora.Server.UI.Controllers
             return RedirectToAction("Machine");
         }
 
-        private Configuration GetConfig(string projectName, string applicationName)
+        private ConfigurationDTO GetConfig(string projectName, string applicationName)
         {
             var hostName = ApplicationConfiguration.Get("pandora_api_url");
             var url = hostName + "/api/Configurations/" + projectName + "/" + applicationName;
@@ -136,7 +136,7 @@ namespace Elders.Pandora.Server.UI.Controllers
                 throw response.ErrorException;
             }
 
-            var config = JsonConvert.DeserializeObject<Configuration>(response.Content);
+            var config = JsonConvert.DeserializeObject<ConfigurationDTO>(response.Content);
 
             return config;
         }
