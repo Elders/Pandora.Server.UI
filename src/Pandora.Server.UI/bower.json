@@ -1,0 +1,16 @@
+{
+  "name": "ASP.NET",
+  "private": true,
+  "dependencies": {
+    "bootstrap": "3.3.5",
+    "jquery": "2.1.4",
+    "jquery-validation": "1.14.0",
+    "jquery-validation-unobtrusive": "3.2.4",
+    "font-awesome": "4.2.0",
+    "modernizr": "2.8.3",
+    "jquery-placeholder": "2.0.8",
+    "jstree": "~3.2.1",
+    "codemirror": "5.7.0",
+    "nanoscroller": "~0.8.7"
+  }
+}

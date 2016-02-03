@@ -1,0 +1,74 @@
+﻿@model Tuple<string, string, Configuration>
+
+@{
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+@{
+    var cluster = Model.Item3.Clusters.Single(x => x.Cluster.Name == Model.Item1);
+    var machine = Model.Item3.Machines.Single(x => x.Cluster.Name == Model.Item1 && x.Name == Model.Item2);
+}
+
+<div class="row">
+    <div class="col-lg-12">
+        <div class="row">
+            <div class="col-lg-12">
+                <form action="" method="post">
+                    <div class="row">
+                        <div class="col-lg-12">
+                            <div class="form-group">
+                                <h2>@Model.Item2</h2>
+                            </div>
+                        </div>
+                    </div>
+                    <hr />
+                    <div class="row">
+                        @foreach (var setting in machine.Settings)
+                        {
+                            <div class="col-lg-6">
+                                <div class="form-group">
+                                    <label for="@setting.Key">@setting.Key</label>
+                                    <input type="text" id="@setting.Key" name="config[@setting.Key]" class="form-control" value="@setting.Value" @(cluster.Cluster.Access.HasAccess(Access.WriteAccess) ? string.Empty : "disabled") />
+                                </div>
+                            </div>
+                        }
+                    </div>
+                    @if (cluster.Cluster.Access.HasAccess(Access.WriteAccess))
+                    {
+                        <hr />
+                        <div class="row">
+                            <div class="col-lg-2">
+                                <div class="form-group">
+                                    <input class="btn btn-success" type="submit" name="submit" value="Save" />
+                                </div>
+                            </div>
+                        </div>
+                    }
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script type="text/javascript">
+    function addMachineValue() {
+        var settingName = $('#settingName').val();
+        var settingValue = $('#settingValue').val();
+
+        if (settingName && settingValue) {
+            var row1 = '<div class="col-lg-6">';
+            var row2 = '<div class="form-group">';
+            var row3 = '<label for="' + settingName + '">' + settingName + '</label>';
+            var row4 = '<input type="text" id="' + settingName + '" name="config[' + settingName + ']" class="form-control" value="' + settingValue + '" @(cluster.Cluster.Access.HasAccess(Access.WriteAccess) ? string.Empty : "disabled") />';
+            var row5 = '</div>';
+            var row6 = '</div>';
+
+            var html = row1 + row2 + row3 + row4 + row5 + row6;
+
+            $('#defaults').append(html);
+            $('#defaultsModalClose').click();
+            $('#settingName').val('');
+            $('#settingValue').val('');
+        }
+    }
+
+</script>
