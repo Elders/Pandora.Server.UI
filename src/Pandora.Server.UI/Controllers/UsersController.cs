@@ -6,12 +6,13 @@ using Microsoft.AspNet.Mvc;
 using Newtonsoft.Json;
 using Elders.Pandora.Server.UI.ViewModels;
 using System.Security.Claims;
+using Microsoft.AspNet.Authorization;
 
 namespace Elders.Pandora.Server.UI.Controllers
 {
+    [Authorize]
     public class UsersController : Controller
     {
-        //[ResourceAuthorize(Resources.Actions.Read, Resources.Users)]
         public ActionResult Index(int count = 0, int start = 0, string filter = null)
         {
             var hostName = ApplicationConfiguration.Get("pandora_api_url");
@@ -35,7 +36,6 @@ namespace Elders.Pandora.Server.UI.Controllers
             return View(result.Data);
         }
 
-        //[ResourceAuthorize(Resources.Actions.Manage, Resources.Users)]
         public ActionResult Edit(string userId)
         {
             var user = GetUser(userId);
@@ -57,7 +57,6 @@ namespace Elders.Pandora.Server.UI.Controllers
         }
 
         [HttpPost]
-        //[ResourceAuthorize(Resources.Actions.Manage, Resources.Users)]
         public ActionResult Edit(string userId, AccessRules[] access)
         {
             var hostName = ApplicationConfiguration.Get("pandora_api_url");

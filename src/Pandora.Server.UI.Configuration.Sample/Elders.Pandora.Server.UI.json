@@ -1,0 +1,20 @@
+{
+  "name": "Elders.Pandora.Server.UI",
+  "references": [
+    { "jar": "Elders.Pandora.Server.Authentication.json" }
+  ],
+  "defaults": {
+    "pandora_api_url": "",
+    "super_admin_users": ""
+  },
+  "clusters": {
+    "local": {
+    }
+  },
+  "machines": {
+    "machine-name": {
+      "pandora_api_url": "",
+      "super_admin_users": ""
+    }
+  }
+}

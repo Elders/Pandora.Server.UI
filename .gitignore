@@ -247,3 +247,4 @@ Elders.Pandora.Authentication.json
 Elders.Pandora.Git.json
 AssemblyInfo.cs
 **/wwwroot/lib
+**/Pandora.Server.UI.Configuration/*

@@ -3,6 +3,8 @@ using Microsoft.AspNet.Authorization;
 using Microsoft.AspNet.Mvc;
 using Newtonsoft.Json;
 using Elders.Pandora.Server.UI.ViewModels;
+using Elders.Pandora.Box;
+using System.Linq;
 
 namespace Elders.Pandora.Server.UI.Controllers
 {
@@ -11,14 +13,30 @@ namespace Elders.Pandora.Server.UI.Controllers
     {
         public ActionResult Index(string projectName, string applicationName)
         {
-            var hostName = ApplicationConfiguration.Get("pandora_api_url");
-
             var breadcrumbs = new List<KeyValuePair<string, string>>();
             breadcrumbs.Add(new KeyValuePair<string, string>("Projects", "/Projects"));
             breadcrumbs.Add(new KeyValuePair<string, string>(projectName, "/Projects/" + projectName));
             ViewBag.Breadcrumbs = breadcrumbs;
 
-            var url = hostName + "/api/Jars/" + projectName + "/" + applicationName;
+            var defaults = GetDefaults(projectName, applicationName);
+            var clusterNames = GetClusters(projectName, applicationName);
+
+            var config = new ConfigurationDTO()
+            {
+                ProjectName = projectName,
+                ApplicationName = applicationName,
+                Defaults = new ConfigurationDTO.DefaultsDTO(new Application() { Access = Access.WriteAccess }, defaults),
+                Clusters = new List<ConfigurationDTO.ClusterDTO>(clusterNames.Select(x => new ConfigurationDTO.ClusterDTO(new ViewModels.Cluster(x, Access.WriteAccess), new Dictionary<string, string>())))
+            };
+
+            return View(config);
+        }
+
+        private IEnumerable<string> GetClusters(string projectName, string applicationName)
+        {
+            var hostName = ApplicationConfiguration.Get("pandora_api_url");
+
+            var url = hostName + "/api/Clusters/ListClusters/" + projectName + "/" + applicationName;
 
             var client = new RestSharp.RestClient(url);
             var request = new RestSharp.RestRequest(RestSharp.Method.GET);
@@ -33,9 +51,33 @@ namespace Elders.Pandora.Server.UI.Controllers
                 throw response.ErrorException;
             }
 
-            var config = JsonConvert.DeserializeObject<ConfigurationDTO>(response.Content);
+            var config = JsonConvert.DeserializeObject<List<string>>(response.Content);
 
-            return View(config);
+            return config;
+        }
+
+        private Dictionary<string, string> GetDefaults(string projectName, string applicationName)
+        {
+            var hostName = ApplicationConfiguration.Get("pandora_api_url");
+
+            var url = hostName + "/api/Defaults/" + projectName + "/" + applicationName;
+
+            var client = new RestSharp.RestClient(url);
+            var request = new RestSharp.RestRequest(RestSharp.Method.GET);
+            request.RequestFormat = RestSharp.DataFormat.Json;
+            request.AddHeader("Content-Type", "application/json");
+            request.AddHeader("Authorization", "Bearer " + User.IdToken());
+
+            var response = client.Execute(request);
+
+            if (!string.IsNullOrWhiteSpace(response.ErrorMessage))
+            {
+                throw response.ErrorException;
+            }
+
+            var config = JsonConvert.DeserializeObject<Dictionary<string, string>>(response.Content);
+
+            return config;
         }
 
         [HttpPost]
@@ -63,7 +105,7 @@ namespace Elders.Pandora.Server.UI.Controllers
             Elders.Pandora.Server.UI.ViewModels.User.GiveAccess(User, projectName, applicationName, clusterName, Access.WriteAccess);
 
             var config = GetConfig(projectName, applicationName);
-            config.Clusters.Add(new ConfigurationDTO.ClusterDTO(new Cluster(newCluster.Name, Access.WriteAccess), newCluster.AsDictionary()));
+            config.Clusters.Add(new ConfigurationDTO.ClusterDTO(new ViewModels.Cluster(newCluster.Name, Access.WriteAccess), newCluster.AsDictionary()));
 
             return View(config);
         }

@@ -56,7 +56,7 @@ namespace Elders.Pandora.Server.UI.Controllers
             breadcrumbs.Add(new KeyValuePair<string, string>("Projects", "/Projects"));
             ViewBag.Breadcrumbs = breadcrumbs;
 
-            var url = hostName + "/api/Jars/" + projectName;
+            var url = hostName + "/api/Jars/ListJars/" + projectName;
 
             var client = new RestSharp.RestClient(url);
             var request = new RestSharp.RestRequest(RestSharp.Method.GET);
@@ -70,7 +70,15 @@ namespace Elders.Pandora.Server.UI.Controllers
                 throw response.ErrorException;
             }
 
-            var configs = JsonConvert.DeserializeObject<List<Server.UI.ViewModels.ConfigurationDTO>>(response.Content);
+            var configsNames = JsonConvert.DeserializeObject<List<string>>(response.Content);
+
+            var configs = new List<ConfigurationDTO>();
+
+            foreach (var config in configsNames)
+            {
+                configs.Add(new ConfigurationDTO() { ProjectName = projectName, ApplicationName = config });
+            }
+
             return View(configs);
         }
 

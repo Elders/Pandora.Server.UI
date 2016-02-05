@@ -37,7 +37,7 @@ namespace Elders.Pandora.Server.UI
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
         public void Configure(IApplicationBuilder app, IHostingEnvironment env, ILoggerFactory loggerFactory)
         {
-            ApplicationConfiguration.SetContext("Elders.Pandora.Api");
+            ApplicationConfiguration.SetContext("Elders.Pandora.Server.UI");
 
             loggerFactory.AddConsole(Configuration.GetSection("Logging"));
             loggerFactory.AddDebug();

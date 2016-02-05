@@ -1,0 +1,22 @@
+﻿{
+    "name": "Elders.Pandora.Server.Authentication",
+    "defaults": {
+        "client_id": "",
+        "client_secret": "",
+        "scopes": ""
+    },
+    "clusters": {
+        "local": {
+            "client_id": "",
+            "client_secret": "",
+            "scopes": ""
+        }
+    },
+    "machines": {
+         "machine-name": {
+            "client_id": "",
+            "client_secret": "",
+            "scopes": ""
+         }
+    }
+}

@@ -4,6 +4,7 @@ using Microsoft.AspNet.Authorization;
 using Microsoft.AspNet.Mvc;
 using Newtonsoft.Json;
 using Elders.Pandora.Server.UI.ViewModels;
+using System.Linq;
 
 namespace Elders.Pandora.Server.UI.Controllers
 {
@@ -19,9 +20,84 @@ namespace Elders.Pandora.Server.UI.Controllers
             breadcrumbs.Add(new KeyValuePair<string, string>(applicationName, "/Projects/" + projectName + "/" + applicationName + "/Clusters"));
             ViewBag.Breadcrumbs = breadcrumbs;
 
-            var config = GetConfig(projectName, applicationName);
+            var clusters = GetCluster(projectName, applicationName, clusterName);
+            var machines = GetMachines(projectName, applicationName, clusterName);
+
+            var config = new ConfigurationDTO()
+            {
+                ProjectName = projectName,
+                ApplicationName = applicationName,
+                Clusters = new List<ConfigurationDTO.ClusterDTO>() { new ConfigurationDTO.ClusterDTO(new ViewModels.Cluster(clusterName, Access.WriteAccess), clusters) },
+                Machines = new List<ConfigurationDTO.MachineDTO>(machines.Select(x => new ConfigurationDTO.MachineDTO(x, new Cluster(clusterName, Access.WriteAccess), new Dictionary<string, string>())))
+            };
 
             return View(new Tuple<string, ConfigurationDTO>(clusterName, config));
+        }
+
+        private List<string> GetMachines(string projectName, string applicationName, string clusterName)
+        {
+            var hostName = ApplicationConfiguration.Get("pandora_api_url");
+            var url = hostName + "/api/Machines/ListMachines/" + projectName + "/" + applicationName + "/" + clusterName;
+
+            var client = new RestSharp.RestClient(url);
+            var request = new RestSharp.RestRequest(RestSharp.Method.GET);
+            request.RequestFormat = RestSharp.DataFormat.Json;
+            request.AddHeader("Content-Type", "application/json");
+            request.AddHeader("Authorization", "Bearer " + User.IdToken());
+            var response = client.Execute(request);
+
+            if (!string.IsNullOrWhiteSpace(response.ErrorMessage))
+            {
+                throw response.ErrorException;
+            }
+
+            var machines = JsonConvert.DeserializeObject<List<string>>(response.Content);
+
+            return machines;
+        }
+
+        private Dictionary<string, string> GetMachine(string projectName, string applicationName, string clusterName, string machineName)
+        {
+            var hostName = ApplicationConfiguration.Get("pandora_api_url");
+            var url = hostName + "/api/Machines/" + projectName + "/" + applicationName + "/" + clusterName + "/" + machineName;
+
+            var client = new RestSharp.RestClient(url);
+            var request = new RestSharp.RestRequest(RestSharp.Method.GET);
+            request.RequestFormat = RestSharp.DataFormat.Json;
+            request.AddHeader("Content-Type", "application/json");
+            request.AddHeader("Authorization", "Bearer " + User.IdToken());
+            var response = client.Execute(request);
+
+            if (!string.IsNullOrWhiteSpace(response.ErrorMessage))
+            {
+                throw response.ErrorException;
+            }
+
+            var machines = JsonConvert.DeserializeObject<Dictionary<string, string>>(response.Content);
+
+            return machines;
+        }
+
+        private Dictionary<string, string> GetCluster(string projectName, string applicationName, string clusterName)
+        {
+            var hostName = ApplicationConfiguration.Get("pandora_api_url");
+            var url = hostName + "/api/Clusters/" + projectName + "/" + applicationName + "/" + clusterName;
+
+            var client = new RestSharp.RestClient(url);
+            var request = new RestSharp.RestRequest(RestSharp.Method.GET);
+            request.RequestFormat = RestSharp.DataFormat.Json;
+            request.AddHeader("Content-Type", "application/json");
+            request.AddHeader("Authorization", "Bearer " + User.IdToken());
+            var response = client.Execute(request);
+
+            if (!string.IsNullOrWhiteSpace(response.ErrorMessage))
+            {
+                throw response.ErrorException;
+            }
+
+            var cluster = JsonConvert.DeserializeObject<Dictionary<string, string>>(response.Content);
+
+            return cluster;
         }
 
         [HttpPost]
@@ -87,7 +163,15 @@ namespace Elders.Pandora.Server.UI.Controllers
             breadcrumbs.Add(new KeyValuePair<string, string>(clusterName, "/Projects/" + projectName + "/" + applicationName + "/" + clusterName + "/Machines"));
             ViewBag.Breadcrumbs = breadcrumbs;
 
-            var config = GetConfig(projectName, applicationName);
+            var machine = GetMachine(projectName, applicationName, clusterName, machineName);
+
+            var config = new ConfigurationDTO()
+            {
+                ProjectName = projectName,
+                ApplicationName = applicationName,
+                Clusters = new List<ConfigurationDTO.ClusterDTO>() { new ConfigurationDTO.ClusterDTO(new ViewModels.Cluster(clusterName, Access.WriteAccess), new Dictionary<string, string>()) },
+                Machines = new List<ConfigurationDTO.MachineDTO>() { new ConfigurationDTO.MachineDTO(machineName, new Cluster(clusterName, Access.WriteAccess), machine) }
+            };
 
             return View(new Tuple<string, string, ConfigurationDTO>(clusterName, machineName, config));
         }

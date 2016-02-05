@@ -1,4 +1,4 @@
-﻿@model List<Configuration>
+﻿@model List<ConfigurationDTO>
 
 @{
     Layout = "~/Views/Shared/_Layout.cshtml";
@@ -86,30 +86,24 @@
                 <div class="col-lg-12">
                     @foreach (var cfg in Model)
                     {
-                        if (cfg.HasAccess())
-                        {
-                            <div class="row fa-border">
-                                <div class="col-lg-11">
-                                    <a href="~/Projects/@(cfg.ProjectName)/@(cfg.ApplicationName)/Clusters"><h4>@cfg.ApplicationName</h4></a>
-                                </div>
-                                <div class="col-lg-1">
-                                    @if (cfg.SecurityAccess.HasAccess(cfg.ProjectName, cfg.ApplicationName, "Defaults", Access.WriteAccess))
-                                    {
-                                        <div class="btn-group">
-                                            <button type="button" class="mb-xs mt-xs mr-xs btn btn-default dropdown-toggle" data-toggle="dropdown">Tasks <span class="caret"></span></button>
-                                            <ul class="dropdown-menu dropdown-menu-right" role="menu">
-                                                @*<li>
-                                                        <a href="~/Projects/@(cfg.ProjectName)/@(cfg.ApplicationName)/Clone" class="btn btn-default">Clone</a>
-                                                        <input type="text" name="cloneName" id="cloneName" />
-                                                    </li>*@
-                                                <li><a href="#" onclick="OpenJsonFile('/Projects/@(cfg.ProjectName)/@(cfg.ApplicationName)/OpenJson')" class="btn btn-default">Open As File</a></li>
-                                                <li><a href="~/Projects/@(cfg.ProjectName)/@(cfg.ApplicationName)/DownloadJson" class="btn btn-default">Download As File</a></li>
-                                            </ul>
-                                        </div>
-                                    }
+                        <div class="row fa-border">
+                            <div class="col-lg-11">
+                                <a href="~/Projects/@(cfg.ProjectName)/@(cfg.ApplicationName)/Clusters"><h4>@cfg.ApplicationName</h4></a>
+                            </div>
+                            <div class="col-lg-1">
+                                <div class="btn-group">
+                                    <button type="button" class="mb-xs mt-xs mr-xs btn btn-default dropdown-toggle" data-toggle="dropdown">Tasks <span class="caret"></span></button>
+                                    <ul class="dropdown-menu dropdown-menu-right" role="menu">
+                                        @*<li>
+                                                <a href="~/Projects/@(cfg.ProjectName)/@(cfg.ApplicationName)/Clone" class="btn btn-default">Clone</a>
+                                                <input type="text" name="cloneName" id="cloneName" />
+                                            </li>*@
+                                        <li><a href="#" onclick="OpenJsonFile('/Projects/@(cfg.ProjectName)/@(cfg.ApplicationName)/OpenJson')" class="btn btn-default">Open As File</a></li>
+                                        <li><a href="~/Projects/@(cfg.ProjectName)/@(cfg.ApplicationName)/DownloadJson" class="btn btn-default">Download As File</a></li>
+                                    </ul>
                                 </div>
                             </div>
-                        }
+                        </div>
                     }
                 </div>
             </div>
