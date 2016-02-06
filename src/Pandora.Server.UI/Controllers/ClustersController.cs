@@ -104,8 +104,16 @@ namespace Elders.Pandora.Server.UI.Controllers
 
             Elders.Pandora.Server.UI.ViewModels.User.GiveAccess(User, projectName, applicationName, clusterName, Access.WriteAccess);
 
-            var config = GetConfig(projectName, applicationName);
-            config.Clusters.Add(new ConfigurationDTO.ClusterDTO(new ViewModels.Cluster(newCluster.Name, Access.WriteAccess), newCluster.AsDictionary()));
+            var defaults = GetDefaults(projectName, applicationName);
+            var clusterNames = GetClusters(projectName, applicationName);
+
+            var config = new ConfigurationDTO()
+            {
+                ProjectName = projectName,
+                ApplicationName = applicationName,
+                Defaults = new ConfigurationDTO.DefaultsDTO(new Application() { Access = Access.WriteAccess }, defaults),
+                Clusters = new List<ConfigurationDTO.ClusterDTO>(clusterNames.Select(x => new ConfigurationDTO.ClusterDTO(new ViewModels.Cluster(x, Access.WriteAccess), new Dictionary<string, string>())))
+            };
 
             return View(config);
         }
@@ -134,28 +142,6 @@ namespace Elders.Pandora.Server.UI.Controllers
             }
 
             return RedirectToAction("Index");
-        }
-
-        private ConfigurationDTO GetConfig(string projectName, string applicationName)
-        {
-            var hostName = ApplicationConfiguration.Get("pandora_api_url");
-            var url = hostName + "/api/Configurations/" + projectName + "/" + applicationName;
-
-            var client = new RestSharp.RestClient(url);
-            var request = new RestSharp.RestRequest(RestSharp.Method.GET);
-            request.RequestFormat = RestSharp.DataFormat.Json;
-            request.AddHeader("Content-Type", "application/json");
-            request.AddHeader("Authorization", "Bearer " + User.IdToken());
-            var response = client.Execute(request);
-
-            if (!string.IsNullOrWhiteSpace(response.ErrorMessage))
-            {
-                throw response.ErrorException;
-            }
-
-            var config = JsonConvert.DeserializeObject<ConfigurationDTO>(response.Content);
-
-            return config;
         }
     }
 }

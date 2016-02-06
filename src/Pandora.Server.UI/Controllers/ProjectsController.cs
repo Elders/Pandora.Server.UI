@@ -86,7 +86,7 @@ namespace Elders.Pandora.Server.UI.Controllers
         public ActionResult Applications(string projectName, string applicationName, string fileName, string config)
         {
             var hostName = ApplicationConfiguration.Get("pandora_api_url");
-            var url = hostName + "/api/Jars/" + projectName + "/" + applicationName + "/" + fileName;
+            var url = hostName + "/api/Jars/" + projectName + "/" + applicationName;
 
             var client = new RestSharp.RestClient(url);
             var request = new RestSharp.RestRequest(RestSharp.Method.POST);

@@ -27,17 +27,17 @@ namespace Elders.Pandora.Server.UI.ViewModels
 
         public static void GiveAccess(ClaimsPrincipal principal, string projectName, string applicationName, string cluster, Access access)
         {
-            var user = GetUser();
+            var user = GetUser(principal);
 
-            UpdateUserAccess(user, projectName, applicationName, cluster, access);
+            UpdateUserAccess(principal, user, projectName, applicationName, cluster, access);
 
             UpdateClaimsPrincipal(principal, user.Access);
         }
 
-        private static User GetUser()
+        private static User GetUser(ClaimsPrincipal principal)
         {
             var hostName = ApplicationConfiguration.Get("pandora_api_url");
-            var url = hostName + "/api/Users/" + ClaimsPrincipal.Current.Id();
+            var url = hostName + "/api/Users/" + principal.Id();
 
             var restClient = new RestSharp.RestClient(url);
 
@@ -45,14 +45,14 @@ namespace Elders.Pandora.Server.UI.ViewModels
             request.Method = RestSharp.Method.GET;
             request.RequestFormat = RestSharp.DataFormat.Json;
             request.AddHeader("Content-Type", "application/json;charset=utf-8");
-            request.AddHeader("Authorization", "Bearer " + ClaimsPrincipal.Current.IdToken());
+            request.AddHeader("Authorization", "Bearer " + principal.IdToken());
 
             var result = restClient.Execute(request);
 
             return JsonConvert.DeserializeObject<User>(result.Content);
         }
 
-        private static void UpdateUserAccess(User user, string projectName, string applicationName, string cluster, Access access)
+        private static void UpdateUserAccess(ClaimsPrincipal principal, User user, string projectName, string applicationName, string cluster, Access access)
         {
             user.Access.AddRule(new AccessRules
             {
@@ -63,7 +63,7 @@ namespace Elders.Pandora.Server.UI.ViewModels
             });
 
             var hostName = ApplicationConfiguration.Get("pandora_api_url");
-            var url = hostName + "/api/Users/" + ClaimsPrincipal.Current.Id();
+            var url = hostName + "/api/Users/" + principal.Id();
 
             var restClient = new RestSharp.RestClient(url);
 
@@ -71,7 +71,7 @@ namespace Elders.Pandora.Server.UI.ViewModels
             editRequest.Method = RestSharp.Method.PUT;
             editRequest.RequestFormat = RestSharp.DataFormat.Json;
             editRequest.AddHeader("Content-Type", "application/json;charset=utf-8");
-            editRequest.AddHeader("Authorization", "Bearer " + ClaimsPrincipal.Current.IdToken());
+            editRequest.AddHeader("Authorization", "Bearer " + principal.IdToken());
 
             editRequest.AddBody(user);
 
