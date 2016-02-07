@@ -6,6 +6,7 @@ using Microsoft.AspNet.Mvc;
 using Newtonsoft.Json;
 using Elders.Pandora.Server.UI.Common;
 using Elders.Pandora.Server.UI.ViewModels;
+using RestSharp.Extensions.MonoHttp;
 
 namespace Elders.Pandora.Server.UI.Controllers
 {
@@ -36,13 +37,14 @@ namespace Elders.Pandora.Server.UI.Controllers
         public ActionResult Index(string projectName, string gitUrl)
         {
             var hostName = ApplicationConfiguration.Get("pandora_api_url");
-            var url = hostName + "/api/Projects/" + projectName + "/" + gitUrl;
+            var url = hostName + "/api/Projects/" + projectName;
 
             var client = new RestSharp.RestClient(url);
             var request = new RestSharp.RestRequest(RestSharp.Method.POST);
             request.RequestFormat = RestSharp.DataFormat.Json;
             request.AddHeader("Content-Type", "application/json");
             request.AddHeader("Authorization", "Bearer " + User.IdToken());
+            request.AddBody(gitUrl);
 
             var response = client.Execute(request);
 
@@ -132,7 +134,7 @@ namespace Elders.Pandora.Server.UI.Controllers
             var url = hostName + "/api/Projects/Update/" + projectName;
 
             var client = new RestSharp.RestClient(url);
-            var request = new RestSharp.RestRequest(RestSharp.Method.POST);
+            var request = new RestSharp.RestRequest(RestSharp.Method.PUT);
             request.RequestFormat = RestSharp.DataFormat.Json;
             request.AddHeader("Content-Type", "application/json");
             request.AddHeader("Authorization", "Bearer " + User.IdToken());
