@@ -50,8 +50,11 @@
                 @foreach (var machine in Model.Item2.Machines.Where(x => x.Cluster.Name == Model.Item1))
                 {
                     <div class="row">
-                        <div class="col-lg-12">
-                            <a href="~/Projects/@(Model.Item2.ProjectName)/@(Model.Item2.ApplicationName)/@(Model.Item1)/@(machine.Name)"><h4>@machine.Name</h4></a>
+                        <div class="col-lg-6">
+                            <a href="~/Projects/@(Model.Item2.ProjectName)/@(Model.Item2.ApplicationName)/@(Model.Item1)/@(machine.Name)"><h5>@machine.Name</h5></a>
+                        </div>
+                        <div class="col-lg-offset-6 col-lg-6">
+                            <a class="btn btn-danger btn-circle" href="~/Projects/@(Model.Item2.ProjectName)/@(Model.Item2.ApplicationName)/@(Model.Item1)/@(machine.Name)/Delete">X</a>
                         </div>
                     </div>
                 }

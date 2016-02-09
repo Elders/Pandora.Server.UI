@@ -125,6 +125,12 @@ namespace Elders.Pandora.Server.UI
                 );
 
                 routes.MapRoute(
+                    name: "DeleteMachineRoute",
+                    template: "Projects/{projectName}/{applicationName}/{clusterName}/{machineName}/Delete",
+                    defaults: new { controller = "Machines", action = "DeleteMachine" }
+                );
+
+                routes.MapRoute(
                     name: "ClustersRoute",
                     template: "Projects/{projectName}/{applicationName}/Clusters",
                     defaults: new { controller = "Clusters", action = "Index" }

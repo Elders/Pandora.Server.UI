@@ -203,6 +203,21 @@ namespace Elders.Pandora.Server.UI.Controllers
             return RedirectToAction("Machine");
         }
 
+        public ActionResult DeleteMachine(string projectName, string applicationName, string clusterName, string machineName)
+        {
+            var hostName = ApplicationConfiguration.Get("pandora_api_url");
+            var url = hostName + "/api/Machines/" + projectName + "/" + applicationName + "/" + machineName;
+
+            var client = new RestSharp.RestClient(url);
+            var request = new RestSharp.RestRequest(RestSharp.Method.DELETE);
+            request.RequestFormat = RestSharp.DataFormat.Json;
+            request.AddHeader("Content-Type", "application/json");
+            request.AddHeader("Authorization", "Bearer " + User.IdToken());
+            var response = client.Execute(request);
+
+            return RedirectToAction("Index", new { projectName = projectName, applicationName = applicationName, clusterName = clusterName });
+        }
+
         private ConfigurationDTO GetConfig(string projectName, string applicationName)
         {
             var hostName = ApplicationConfiguration.Get("pandora_api_url");
