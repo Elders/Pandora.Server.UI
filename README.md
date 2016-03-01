@@ -37,10 +37,11 @@
     * Replase the `machine-name` node with your machine's name
     * Set your email for `super_admin_users` (the same email you used for google credentials)
 
-6. Open a cmd window as an administrator in the repository directory and execute the `set_variables-as-admin.bat` script
-7. Execute `dnu restore`
-8. Execute `run.cmd`
-9. Happy coding!
+6. Ensure that you have an environment variabe 'CLUSTER_NAME' with value 'local'
+7. Open a cmd window as an administrator in the repository directory and execute the `set_variables-as-admin.bat` script
+8. Execute `dnu restore`
+9. Execute `run.cmd`
+10. Happy coding!
 
 
 
