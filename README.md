@@ -5,6 +5,7 @@
 - .NET Framework 4.6
 - ASP.NET 5
 - HttpPlatformHandler v1.2 - http://www.iis.net/downloads/microsoft/httpplatformhandler#additionalDownloads (use the additional downloads section)
+
 		Create google credentials for Pandora on https://console.developers.google.com
 		(You can skip this step if you've already did it):
 
@@ -14,7 +15,7 @@
 		4. Select "Web application"
 		5. Enter "Pandora" as a name
 		6. Save the client id and the client secret.
-- - -
+
 1. Clone the repository from `git@github.com:Elders/Pandora.Server.UI.git` or `https://github.com/Elders/Pandora.Server.UI.git`
 2. Go to `Pandora.Server.UI\src` and create a copy of the `Pandora.Server.UI.Configuration.Sample` folder
 3. Rename the newly created folder to `Pandora.Server.UI.Configuration` (remove `.Sample - Copy`)
