@@ -64,78 +64,108 @@
 </div>
 
 <div class="row">
-    <div class="col-lg-12">
-        <div class="row">
-            <div class="col-lg-12">
-                <div class="form-group">
-                    <h2>@Model.ApplicationName</h2>
-                </div>
+    <div class="row">
+        <div class="col-lg-12">
+            <div class="form-group">
+                <h2>@Model.ApplicationName</h2>
             </div>
         </div>
-        <hr />
-        <div class="row">
-            <div class="col-lg-12">
-                <div class="col-lg-1">
-                    <h4>Clusters:</h4>
-                </div>
-                @foreach (var cluster in Model.Clusters)
+    </div>
+    <hr />
+    <div class="col-md-11">
+        <form action="@(HttpContextAccessor.HttpContext.Request.Path)/Defaults" method="post">
+            <div class="row">
+                <h4 class="pull-left">Defaults</h4>
+            </div>
+            <div id="defaults" class="row">
+                @if (ReferenceEquals(null, Model.Defaults.Settings) == false)
                 {
-                    <div class="col-lg-1 text-center">
-                        <a href="~/Projects/@(Model.ProjectName)/@(Model.ApplicationName)/@(cluster.Cluster.Name)/Machines"><h4>@cluster.Cluster.Name</h4></a>
+                    <div class="table-responsive">
+                        <table class="table table-bordered">
+                            <thead>
+                                <tr>
+                                    <th>Key</th>
+                                    <th>Value</th>
+                                    <th class="col-md-1">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var setting in Model.Defaults.Settings)
+                                {
+                                    <tr id="table-row-@setting.Key">
+                                        <td>
+                                            @setting.Key
+                                            <input type="hidden" id="setting-key-@(setting.Key)" value="@setting.Key" />
+                                        </td>
+                                        <td>
+                                            @setting.Value
+                                            <input type="hidden" id="setting-value-@(setting.Key)" name="config[@setting.Key]" value="@setting.Value" />
+                                        </td>
+                                        <td class="col-md-1">
+                                            @if (Model.Defaults.Application.Access.HasAccess(Access.WriteAccess))
+                                            {
+                                                <a href="#" onclick="editDefaultValue('@setting.Key', '@setting.Value')">
+                                                    <i class="fa fa-edit"></i>
+                                                </a>
+                                                <a href="#" onclick="">
+                                                    <i class="fa fa-trash"></i>
+                                                </a>
+                                            }
+                                            else
+                                            {
+                                                <i class="fa fa-edit"></i>
+                                                <i class="fa fa-trash"></i>
+                                            }
+                                        </td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
                     </div>
                 }
 
                 @if (Model.Defaults.Application.Access.HasAccess(Access.WriteAccess))
                 {
-                    <div class="form-group">
-                        <a class="btn btn-success btn-circle" href="#" data-toggle="modal" data-target="#clusterModal"><i class="fa fa-plus"></i></a>
-                    </div>
+                    <a class="pull-left btn btn-success btn-circle" href="#" data-toggle="modal" data-target="#defaultsModal">
+                        Add new
+                    </a>
                 }
             </div>
-        </div>
-        <hr />
-        <div class="row">
-            <div class="col-lg-12">
-                <form action="@(HttpContextAccessor.HttpContext.Request.Path)/Defaults" method="post">
-                    <div class="row">
-                        <div class="col-lg-12">
-                            <div class="form-group">
-                                <h2>Defaults:</h2>
-                            </div>
-                            @if (Model.Defaults.Application.Access.HasAccess(Access.WriteAccess))
-                            {
-                                <div class="form-group">
-                                    <a class="btn btn-success btn-circle" href="#" data-toggle="modal" data-target="#defaultsModal"><i class="fa fa-plus"></i></a>
-                                </div>
-                            }
-                        </div>
+            <hr />
+            @if (Model.Defaults.Application.Access.HasAccess(Access.WriteAccess))
+            {
+                <div class="row">
+                    <div class="form-group">
+                        <input class="btn btn-success" type="submit" name="submit" value="Save" />
                     </div>
-                    <div id="defaults" class="row">
+                </div>
+            }
+        </form>
 
-                        @foreach (var setting in Model.Defaults.Settings)
-                        {
-                            <div class="col-lg-6">
-                                <div class="form-group">
-                                    <label for="@setting.Key">@setting.Key</label>
-                                    <input type="text" id="@setting.Key" name="config[@setting.Key]" class="form-control" value="@setting.Value" @(Model.Defaults.Application.Access.HasAccess(Access.WriteAccess) ? string.Empty : "disabled") />
-                                </div>
-                            </div>
-                        }
-                    </div>
-                    @if (Model.Defaults.Application.Access.HasAccess(Access.WriteAccess))
-                    {
-                        <hr />
-                        <div class="row">
-                            <div class="col-lg-2">
-                                <div class="form-group">
-                                    <input class="btn btn-success" type="submit" name="submit" value="Save" />
-                                </div>
-                            </div>
-                        </div>
-                    }
-                </form>
-            </div>
+    </div>
+    <div class="col-sm-1 pull-right">
+        <div class="row">
+            <h4 class="pull-left">Clusters</h4>
         </div>
+
+        @if (ReferenceEquals(null, Model.Clusters) == false)
+        {
+            <div class="row list-group">
+                @foreach (var cluster in Model.Clusters)
+                {
+                    <a class="list-group-item" href="~/Projects/@(Model.ProjectName)/@(Model.ApplicationName)/@(cluster.Cluster.Name)/Machines">
+                        @cluster.Cluster.Name
+                    </a>
+                }
+            </div>
+        }
+
+        @if (Model.Defaults.Application.Access.HasAccess(Access.WriteAccess))
+            {
+            <a class="pull-left btn btn-success btn-circle" href="#" data-toggle="modal" data-target="#clusterModal">
+                Add new
+            </a>
+        }
     </div>
 </div>
 
@@ -159,6 +189,13 @@
             $('#settingName').val('');
             $('#settingValue').val('');
         }
+    }
+
+    function editDefaultValue(key, value) {
+        $('#settingName').val(key);
+        $('#settingValue').val(value);
+        $('#defaultsModal').modal();
+        $('#defaultsModal .modal-title').text('Edit Default Setting');
     }
 
 </script>

@@ -75,7 +75,8 @@
                             <div class="col-lg-6">
                                 <div class="form-group">
                                     <label for="@setting.Key">@setting.Key</label>
-                                    <input type="text" id="@setting.Key" name="config[@setting.Key]" class="form-control" value="@setting.Value" @(cluster.Cluster.Access.HasAccess(Access.WriteAccess) ? string.Empty : "disabled") />
+                                    <input type="text" id="@setting.Key" name="config[@setting.Key]" class="form-control"
+                                           value="@setting.Value" @(cluster.Cluster.Access.HasAccess(Access.WriteAccess) ? string.Empty : "disabled") />
                                 </div>
                             </div>
                         }

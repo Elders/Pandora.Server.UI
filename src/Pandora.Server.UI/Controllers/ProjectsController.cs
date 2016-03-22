@@ -76,9 +76,12 @@ namespace Elders.Pandora.Server.UI.Controllers
 
             var configs = new List<ConfigurationDTO>();
 
-            foreach (var config in configsNames)
+            if (ReferenceEquals(null, configsNames) == false && configsNames.Count != 0)
             {
-                configs.Add(new ConfigurationDTO() { ProjectName = projectName, ApplicationName = config });
+                foreach (var config in configsNames)
+                {
+                    configs.Add(new ConfigurationDTO { ProjectName = projectName, ApplicationName = config });
+                }
             }
 
             return View(configs);

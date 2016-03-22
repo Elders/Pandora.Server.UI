@@ -25,9 +25,13 @@ namespace Elders.Pandora.Server.UI.Controllers
             {
                 ProjectName = projectName,
                 ApplicationName = applicationName,
-                Defaults = new ConfigurationDTO.DefaultsDTO(new Application() { Access = Access.WriteAccess }, defaults),
-                Clusters = new List<ConfigurationDTO.ClusterDTO>(clusterNames.Select(x => new ConfigurationDTO.ClusterDTO(new ViewModels.Cluster(x, Access.WriteAccess), new Dictionary<string, string>())))
+                Defaults = new ConfigurationDTO.DefaultsDTO(new Application() { Access = Access.WriteAccess }, defaults)
             };
+
+            if (ReferenceEquals(null, clusterNames) == false)
+            {
+                config.Clusters = new List<ConfigurationDTO.ClusterDTO>(clusterNames.Select(x => new ConfigurationDTO.ClusterDTO(new ViewModels.Cluster(x, Access.WriteAccess), new Dictionary<string, string>())));
+            }
 
             return View(config);
         }
