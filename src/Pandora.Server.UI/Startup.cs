@@ -76,6 +76,8 @@ namespace Elders.Pandora.Server.UI
                     options.Scope.Add(scope);
                 }
 
+                options.AccessType = "offline";
+
                 options.SaveTokensAsClaims = true;
 
                 options.Events = new OAuthEvents()
