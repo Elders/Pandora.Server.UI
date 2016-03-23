@@ -18,7 +18,7 @@ namespace Elders.Pandora.Server.UI.Controllers
             breadcrumbs.Add(new KeyValuePair<string, string>(projectName, "/Projects/" + projectName));
             ViewBag.Breadcrumbs = breadcrumbs;
 
-            var defaults = GetDefaults(projectName, applicationName);
+            var defaults = GetDefaultSettings(projectName, applicationName);
             var clusterNames = GetClusters(projectName, applicationName);
 
             var config = new ConfigurationDTO()
@@ -30,7 +30,7 @@ namespace Elders.Pandora.Server.UI.Controllers
 
             if (ReferenceEquals(null, clusterNames) == false)
             {
-                config.Clusters = new List<ConfigurationDTO.ClusterDTO>(clusterNames.Select(x => new ConfigurationDTO.ClusterDTO(new ViewModels.Cluster(x, Access.WriteAccess), new Dictionary<string, string>())));
+                config.Clusters = new List<ConfigurationDTO.ClusterDTO>(clusterNames.Select(x => new ConfigurationDTO.ClusterDTO(new ViewModels.Cluster(x, Access.WriteAccess), new ConfigurationDTO.Settings())));
             }
 
             return View(config);
@@ -60,7 +60,7 @@ namespace Elders.Pandora.Server.UI.Controllers
             return config;
         }
 
-        private Dictionary<string, string> GetDefaults(string projectName, string applicationName)
+        private ConfigurationDTO.Settings GetDefaultSettings(string projectName, string applicationName)
         {
             var hostName = ApplicationConfiguration.Get("pandora_api_url");
 
@@ -79,9 +79,10 @@ namespace Elders.Pandora.Server.UI.Controllers
                 throw response.ErrorException;
             }
 
-            var config = JsonConvert.DeserializeObject<Dictionary<string, string>>(response.Content);
+            var config = JsonConvert.DeserializeObject<Dictionary<string, string>>(response.Content)
+                .Select(x => new ConfigurationDTO.SettingDTO(x.Key, x.Value));
 
-            return config;
+            return new ConfigurationDTO.Settings(config);
         }
 
         [HttpPost]
@@ -106,17 +107,17 @@ namespace Elders.Pandora.Server.UI.Controllers
                 throw response.ErrorException;
             }
 
-            Elders.Pandora.Server.UI.ViewModels.User.GiveAccess(User, projectName, applicationName, clusterName, Access.WriteAccess);
+            ViewModels.User.GiveAccess(User, projectName, applicationName, clusterName, Access.WriteAccess);
 
-            var defaults = GetDefaults(projectName, applicationName);
+            var defaultSettings = GetDefaultSettings(projectName, applicationName);
             var clusterNames = GetClusters(projectName, applicationName);
 
             var config = new ConfigurationDTO()
             {
                 ProjectName = projectName,
                 ApplicationName = applicationName,
-                Defaults = new ConfigurationDTO.DefaultsDTO(new Application() { Access = Access.WriteAccess }, defaults),
-                Clusters = new List<ConfigurationDTO.ClusterDTO>(clusterNames.Select(x => new ConfigurationDTO.ClusterDTO(new ViewModels.Cluster(x, Access.WriteAccess), new Dictionary<string, string>())))
+                Defaults = new ConfigurationDTO.DefaultsDTO(new Application() { Access = Access.WriteAccess }, defaultSettings),
+                Clusters = new List<ConfigurationDTO.ClusterDTO>(clusterNames.Select(x => new ConfigurationDTO.ClusterDTO(new ViewModels.Cluster(x, Access.WriteAccess), new ConfigurationDTO.Settings())))
             };
 
             return View(config);

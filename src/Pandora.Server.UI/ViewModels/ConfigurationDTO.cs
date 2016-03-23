@@ -1,9 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Security.Claims;
-using Elders.Pandora.Box;
-using Newtonsoft.Json;
 
 namespace Elders.Pandora.Server.UI.ViewModels
 {
@@ -23,8 +20,8 @@ namespace Elders.Pandora.Server.UI.ViewModels
 
         public bool HasAccess()
         {
-            if (SecurityAccess.Projects.Any(x => x.Name == this.ProjectName) &&
-                SecurityAccess.Projects.SingleOrDefault(x => x.Name == this.ProjectName).Applications.Any(x => x.Name == this.ApplicationName))
+            if (SecurityAccess.Projects.Any(x => x.Name == ProjectName) &&
+                SecurityAccess.Projects.SingleOrDefault(x => x.Name == ProjectName).Applications.Any(x => x.Name == ApplicationName))
                 return true;
 
             else
@@ -33,24 +30,21 @@ namespace Elders.Pandora.Server.UI.ViewModels
 
         public bool HasAccess(string cluster)
         {
-            if (this.HasAccess())
+            if (HasAccess())
             {
-                if (SecurityAccess
+                return SecurityAccess
                     .Projects.SingleOrDefault(x => x.Name == this.ProjectName)
                     .Applications.SingleOrDefault(x => x.Name == this.ApplicationName)
-                    .Clusters.Any(x => x.Name == cluster))
-                    return true;
-
-                else
-                    return false;
+                    .Clusters
+                    .Any(x => x.Name == cluster);
             }
-            else
-                return false;
+
+            return false;
         }
 
         public class MachineDTO
         {
-            public MachineDTO(string name, Cluster cluster, Dictionary<string, string> settings)
+            public MachineDTO(string name, Cluster cluster, Settings settings)
             {
                 Name = name;
                 Cluster = cluster;
@@ -61,28 +55,20 @@ namespace Elders.Pandora.Server.UI.ViewModels
 
             public Cluster Cluster { get; set; }
 
-            public Dictionary<string, string> Settings { get; set; }
+            public Settings Settings { get; set; }
 
-            public string this[string settingName]
+            public string this[string settingKey]
             {
                 get
                 {
-                    string value = String.Empty;
-                    if (Settings.TryGetValue(settingName.ToLowerInvariant(), out value))
-                    {
-                        return value;
-                    }
-                    else
-                    {
-                        throw new System.Collections.Generic.KeyNotFoundException("SettingName does not exist in the collection");
-                    }
+                    return Settings[settingKey.ToLowerInvariant()];
                 }
             }
         }
 
         public class ClusterDTO
         {
-            public ClusterDTO(Cluster cluster, Dictionary<string, string> settings)
+            public ClusterDTO(Cluster cluster, Settings settings)
             {
                 Cluster = cluster;
                 Settings = settings;
@@ -90,28 +76,20 @@ namespace Elders.Pandora.Server.UI.ViewModels
 
             public Cluster Cluster { get; set; }
 
-            public Dictionary<string, string> Settings { get; set; }
+            public Settings Settings { get; set; }
 
-            public string this[string settingName]
+            public string this[string settingKey]
             {
                 get
                 {
-                    string value = String.Empty;
-                    if (Settings.TryGetValue(settingName.ToLowerInvariant(), out value))
-                    {
-                        return value;
-                    }
-                    else
-                    {
-                        throw new System.Collections.Generic.KeyNotFoundException("SettingName does not exist in the collection");
-                    }
+                    return Settings[settingKey.ToLowerInvariant()];
                 }
             }
         }
 
         public class DefaultsDTO
         {
-            public DefaultsDTO(Application application, Dictionary<string, string> settings)
+            public DefaultsDTO(Application application, Settings settings)
             {
                 Application = application;
                 Settings = settings;
@@ -119,23 +97,62 @@ namespace Elders.Pandora.Server.UI.ViewModels
 
             public Application Application { get; set; }
 
-            public Dictionary<string, string> Settings { get; set; }
+            public Settings Settings { get; set; }
 
-            public string this[string settingName]
+            public string this[string settingKey]
             {
                 get
                 {
-                    string value = String.Empty;
-                    if (Settings.TryGetValue(settingName.ToLowerInvariant(), out value))
-                    {
-                        return value;
-                    }
-                    else
-                    {
-                        throw new System.Collections.Generic.KeyNotFoundException("SettingName does not exist in the collection");
-                    }
+                    return Settings[settingKey.ToLowerInvariant()];
                 }
             }
+        }
+
+        public class Settings : List<SettingDTO>
+        {
+            public Settings() : base()
+            {
+            }
+
+            public Settings(IEnumerable<SettingDTO> settings) : base(settings)
+            {
+            }
+
+            public bool TryGetSetting(string key, out SettingDTO setting)
+            {
+                setting = this.SingleOrDefault(x => x.Key == key);
+
+                if (ReferenceEquals(null, setting)) return false;
+
+                return true;
+            }
+
+            public string this[string settingKey]
+            {
+                get
+                {
+                    SettingDTO setting;
+                    if (TryGetSetting(settingKey, out setting) == false)
+                        throw new KeyNotFoundException($"Element with key '{settingKey}' was not found");
+
+                    return setting.Value;
+                }
+            }
+        }
+
+        public class SettingDTO
+        {
+            public SettingDTO(string key, string value)
+            {
+                if (string.IsNullOrWhiteSpace(key)) throw new ArgumentNullException(nameof(key));
+
+                Key = key;
+                Value = value;
+            }
+
+            public string Key { get; set; }
+
+            public string Value { get; set; }
         }
     }
 }

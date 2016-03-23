@@ -20,15 +20,15 @@ namespace Elders.Pandora.Server.UI.Controllers
             breadcrumbs.Add(new KeyValuePair<string, string>(applicationName, "/Projects/" + projectName + "/" + applicationName + "/Clusters"));
             ViewBag.Breadcrumbs = breadcrumbs;
 
-            var clusters = GetCluster(projectName, applicationName, clusterName);
+            var clusterSettings = GetClusterSettings(projectName, applicationName, clusterName);
             var machines = GetMachines(projectName, applicationName, clusterName);
 
-            var config = new ConfigurationDTO()
+            var config = new ConfigurationDTO
             {
                 ProjectName = projectName,
                 ApplicationName = applicationName,
-                Clusters = new List<ConfigurationDTO.ClusterDTO>() { new ConfigurationDTO.ClusterDTO(new ViewModels.Cluster(clusterName, Access.WriteAccess), clusters) },
-                Machines = new List<ConfigurationDTO.MachineDTO>(machines.Select(x => new ConfigurationDTO.MachineDTO(x, new Cluster(clusterName, Access.WriteAccess), new Dictionary<string, string>())))
+                Clusters = new List<ConfigurationDTO.ClusterDTO> { new ConfigurationDTO.ClusterDTO(new Cluster(clusterName, Access.WriteAccess), clusterSettings) },
+                Machines = new List<ConfigurationDTO.MachineDTO>(machines.Select(x => new ConfigurationDTO.MachineDTO(x, new Cluster(clusterName, Access.WriteAccess), new ConfigurationDTO.Settings())))
             };
 
             return View(new Tuple<string, ConfigurationDTO>(clusterName, config));
@@ -56,7 +56,7 @@ namespace Elders.Pandora.Server.UI.Controllers
             return machines;
         }
 
-        private Dictionary<string, string> GetMachine(string projectName, string applicationName, string clusterName, string machineName)
+        private ConfigurationDTO.Settings GetMachineSettings(string projectName, string applicationName, string clusterName, string machineName)
         {
             var hostName = ApplicationConfiguration.Get("pandora_api_url");
             var url = hostName + "/api/Machines/" + projectName + "/" + applicationName + "/" + clusterName + "/" + machineName;
@@ -73,12 +73,13 @@ namespace Elders.Pandora.Server.UI.Controllers
                 throw response.ErrorException;
             }
 
-            var machines = JsonConvert.DeserializeObject<Dictionary<string, string>>(response.Content);
+            var config = JsonConvert.DeserializeObject<Dictionary<string, string>>(response.Content)
+                .Select(x => new ConfigurationDTO.SettingDTO(x.Key, x.Value));
 
-            return machines;
+            return new ConfigurationDTO.Settings(config);
         }
 
-        private Dictionary<string, string> GetCluster(string projectName, string applicationName, string clusterName)
+        private ConfigurationDTO.Settings GetClusterSettings(string projectName, string applicationName, string clusterName)
         {
             var hostName = ApplicationConfiguration.Get("pandora_api_url");
             var url = hostName + "/api/Clusters/" + projectName + "/" + applicationName + "/" + clusterName;
@@ -95,9 +96,10 @@ namespace Elders.Pandora.Server.UI.Controllers
                 throw response.ErrorException;
             }
 
-            var cluster = JsonConvert.DeserializeObject<Dictionary<string, string>>(response.Content);
+            var config = JsonConvert.DeserializeObject<Dictionary<string, string>>(response.Content)
+                .Select(x => new ConfigurationDTO.SettingDTO(x.Key, x.Value));
 
-            return cluster;
+            return new ConfigurationDTO.Settings(config);
         }
 
         [HttpPost]
@@ -163,14 +165,14 @@ namespace Elders.Pandora.Server.UI.Controllers
             breadcrumbs.Add(new KeyValuePair<string, string>(clusterName, "/Projects/" + projectName + "/" + applicationName + "/" + clusterName + "/Machines"));
             ViewBag.Breadcrumbs = breadcrumbs;
 
-            var machine = GetMachine(projectName, applicationName, clusterName, machineName);
+            var machineSettings = GetMachineSettings(projectName, applicationName, clusterName, machineName);
 
-            var config = new ConfigurationDTO()
+            var config = new ConfigurationDTO
             {
                 ProjectName = projectName,
                 ApplicationName = applicationName,
-                Clusters = new List<ConfigurationDTO.ClusterDTO>() { new ConfigurationDTO.ClusterDTO(new ViewModels.Cluster(clusterName, Access.WriteAccess), new Dictionary<string, string>()) },
-                Machines = new List<ConfigurationDTO.MachineDTO>() { new ConfigurationDTO.MachineDTO(machineName, new Cluster(clusterName, Access.WriteAccess), machine) }
+                Clusters = new List<ConfigurationDTO.ClusterDTO> { new ConfigurationDTO.ClusterDTO(new Cluster(clusterName, Access.WriteAccess), new ConfigurationDTO.Settings()) },
+                Machines = new List<ConfigurationDTO.MachineDTO> { new ConfigurationDTO.MachineDTO(machineName, new Cluster(clusterName, Access.WriteAccess), machineSettings) }
             };
 
             return View(new Tuple<string, string, ConfigurationDTO>(clusterName, machineName, config));
