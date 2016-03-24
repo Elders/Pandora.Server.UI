@@ -38,7 +38,7 @@
         <div class="modal-content">
             <div class="modal-header">
                 <button type="button" id="defaultsModalClose" class="close" data-dismiss="modal" aria-hidden="true">×</button>
-                <h4 class="modal-title">Add Default Setting</h4>
+                <h4 class="modal-title">Default Setting</h4>
             </div>
             <div class="modal-body">
                 <div class="row">
@@ -73,41 +73,51 @@
     </div>
     <hr />
     <div class="col-md-9">
-        <form action="@(HttpContextAccessor.HttpContext.Request.Path)/Defaults" method="post">
+        <form action="@(HttpContextAccessor.HttpContext.Request.Path)/Defaults" method="post" class="col-md-12">
             <div class="row">
                 <h4 class="pull-left">Defaults</h4>
             </div>
             <div class="row">
                 @if (ReferenceEquals(null, Model.Defaults.Settings) == false)
                 {
-                    <div id="defaults" class="form-horizontal">
-                        @foreach (var setting in Model.Defaults.Settings)
-                        {
-                            <div id="setting-row-@setting.Key" class="form-group setting-row">
-                                <label for="setting-value-@(setting.Key)" class="col-sm-1 control-label">@setting.Key</label>
-                                <div class="col-sm-9">
-                                    <input type="text" id="setting-value-@(setting.Key)" name="config[@setting.Key]" class="form-control" value="@setting.Value" />
-                                </div>
-                                <div class="col-sm-2 form-group btn-group">
-                                    <a href="#" class="btn btn-default pull-left @(Model.Defaults.Application.Access.HasAccess(Access.WriteAccess) ? string.Empty : "disabled")">
-                                        <i class="fa fa-pencil"></i>
-                                    </a>
-                                    <a href="#" class="btn btn-default pull-left @(Model.Defaults.Application.Access.HasAccess(Access.WriteAccess) ? string.Empty : "disabled")">
-                                        <i class="fa fa-trash"></i>
-                                    </a>
-                                </div>
-                            </div>
-                        }
+                    <div id="defaults" class="table-responsive">
+                        <table class="table table-hover" ng-controller="defaultsController">
+                            <thead>
+                                <tr>
+                                    <th>Key</th>
+                                    <th>Value</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var setting in Model.Defaults.Settings)
+                                {
+                                    <tr id="setting-row-@setting.Key">
+                                        <td>
+                                            <input type="text" class="setting-key-@(setting.Key)" value="@(setting.Key)" />
+                                            <span class="hidden setting-key-@(setting.Key)">@setting.Key</span>
+                                        </td>
+                                        <td id="setting-value-@(setting.Key)">@setting.Value</td>
+                                        <td class="col-md-1 actions">
+                                            <div>
+                                                <a href="#" class="pull-left @(Model.Defaults.Application.Access.HasAccess(Access.WriteAccess) ? string.Empty : "disabled")" onclick="editDefaultValue('@(setting.Key)', '@(setting.Value)')">
+                                                    <i class="fa fa-pencil"></i>
+                                                </a>
+                                                <a href="#" class="pull-left @(Model.Defaults.Application.Access.HasAccess(Access.WriteAccess) ? string.Empty : "disabled")">
+                                                    <i class="fa fa-trash"></i>
+                                                </a>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
 
                         @if (Model.Defaults.Application.Access.HasAccess(Access.WriteAccess))
                         {
-                            <div class="form-group">
-                                <div class="col-sm-offset-1 col-sm-11">
-                                    <a class="pull-left btn btn-success btn-circle" href="#" data-toggle="modal" data-target="#defaultsModal">
-                                        Add new
-                                    </a>
-                                </div>
-                            </div>
+                            <a class="pull-left btn btn-primary btn-circle" href="#" data-toggle="modal" data-target="#defaultsModal">
+                                Add new
+                            </a>
                         }
                     </div>
                 }
@@ -115,7 +125,7 @@
             <hr />
             @if (Model.Defaults.Application.Access.HasAccess(Access.WriteAccess))
             {
-                <input class="btn btn-success" type="submit" name="submit" value="Save" />
+                <input class="btn btn-success row" type="submit" name="submit" value="Save" />
             }
         </form>
 
@@ -140,7 +150,7 @@
 
         @if (Model.Defaults.Application.Access.HasAccess(Access.WriteAccess))
         {
-            <a class="row btn btn-success btn-circle" href="#" data-toggle="modal" data-target="#clusterModal">
+            <a class="row btn btn-primary btn-circle" href="#" data-toggle="modal" data-target="#clusterModal">
                 Add new
             </a>
         }
@@ -174,7 +184,6 @@
         $('#settingName').val(key);
         $('#settingValue').val(value);
         $('#defaultsModal').modal();
-        $('#defaultsModal .modal-title').text('Edit Default Setting');
     }
 
 </script>

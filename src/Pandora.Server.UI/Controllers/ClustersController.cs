@@ -124,6 +124,13 @@ namespace Elders.Pandora.Server.UI.Controllers
         }
 
         [HttpPost]
+        public ActionResult ChangeSetting(ConfigurationDTO.SettingDTO oldSetting, ConfigurationDTO.SettingDTO newSetting)
+        {
+
+            return RedirectToAction("Index");
+        }
+
+        [HttpPost]
         public ActionResult Defaults(string projectName, string applicationName, Dictionary<string, string> config)
         {
             var hostName = ApplicationConfiguration.Get("pandora_api_url");
