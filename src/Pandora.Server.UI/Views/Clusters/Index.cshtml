@@ -38,7 +38,7 @@
         <div class="modal-content">
             <div class="modal-header">
                 <button type="button" id="defaultsModalClose" class="close" data-dismiss="modal" aria-hidden="true">×</button>
-                <h4 class="modal-title">Default Setting</h4>
+                <h4 class="modal-title">Add Default Setting</h4>
             </div>
             <div class="modal-body">
                 <div class="row">
@@ -80,8 +80,8 @@
             <div class="row">
                 @if (ReferenceEquals(null, Model.Defaults.Settings) == false)
                 {
-                    <div id="defaults" class="table-responsive">
-                        <table class="table table-hover" ng-controller="defaultsController">
+                    <div class="table-responsive">
+                        <table id="defaults-table" class="table table-hover" ng-controller="defaultsController">
                             <thead>
                                 <tr>
                                     <th>Key</th>
@@ -90,25 +90,15 @@
                                 </tr>
                             </thead>
                             <tbody>
-                                @foreach (var setting in Model.Defaults.Settings)
+                                @for (var i = 0; i < Model.Defaults.Settings.Count; ++i)
                                 {
-                                    <tr id="setting-row-@setting.Key">
-                                        <td>
-                                            <input type="text" class="setting-key-@(setting.Key)" value="@(setting.Key)" />
-                                            <span class="hidden setting-key-@(setting.Key)">@setting.Key</span>
-                                        </td>
-                                        <td id="setting-value-@(setting.Key)">@setting.Value</td>
-                                        <td class="col-md-1 actions">
-                                            <div>
-                                                <a href="#" class="pull-left @(Model.Defaults.Application.Access.HasAccess(Access.WriteAccess) ? string.Empty : "disabled")" onclick="editDefaultValue('@(setting.Key)', '@(setting.Value)')">
-                                                    <i class="fa fa-pencil"></i>
-                                                </a>
-                                                <a href="#" class="pull-left @(Model.Defaults.Application.Access.HasAccess(Access.WriteAccess) ? string.Empty : "disabled")">
-                                                    <i class="fa fa-trash"></i>
-                                                </a>
-                                            </div>
-                                        </td>
-                                    </tr>
+                                    @Html.EditorFor(x => x.Defaults.Settings[i],
+                                        "SettingEditor",
+                                        new
+                                        {
+                                            index = i,
+                                            IsDisabled = Model.Defaults.Application.Access.HasAccess(Access.WriteAccess) ? string.Empty : "disabled"
+                                        })
                                 }
                             </tbody>
                         </table>
@@ -128,7 +118,6 @@
                 <input class="btn btn-success row" type="submit" name="submit" value="Save" />
             }
         </form>
-
     </div>
 
     <div class="col-sm-3 pull-right">
@@ -158,32 +147,87 @@
 </div>
 
 <script type="text/javascript">
+
     function addDefaultValue() {
         var settingName = $('#settingName').val();
         var settingValue = $('#settingValue').val();
 
         if (settingName && settingValue) {
 
-            var row1 = '<div id="setting-row-' + settingName + '" class="form-group setting-row">';
-            var row2 = '<label for="setting-value-' + settingName + '" class="col-sm-1 control-label">' + settingName + '</label>';
-            var row3 = '<div class="col-sm-11">';
-            var row4 = '<input type="text" id="setting-value-' + settingName + '" name="config[' + settingName + ']" class="form-control" value="' + settingValue + '" />';
-            var row5 = '</div>';
-            var row6 = '</div>';
+            var currentIndex = $("#defaults-table tbody tr").length;
+            var html = '';
+            $.get("/Clusters/GetSettingRow", {
+                key: settingName,
+                value: settingValue,
+                index: currentIndex
+            }, function (data, status) {
+                if (status === 'success') {
+                    $("#defaults-table tbody tr").last().after(data);
+                }
 
-            var html = row1 + row2 + row3 + row4 + row5 + row6;
-
-            $('#defaults .setting-row').last().after(html);
-            $('#defaultsModalClose').click();
-            $('#settingName').val('');
-            $('#settingValue').val('');
+                $('#defaultsModalClose').click();
+                $('#settingName').val('');
+                $('#settingValue').val('');
+            });
         }
     }
 
-    function editDefaultValue(key, value) {
-        $('#settingName').val(key);
-        $('#settingValue').val(value);
-        $('#defaultsModal').modal();
+    function editDefaultValue(key) {
+
+        $('#setting-row-' + key + ' .edit').hide();
+        //$('#setting-row-' + key + ' .delete').hide();
+        $('#setting-row-' + key + ' .save').show();
+        $('#setting-row-' + key + ' .cancel').show();
+
+        $('span.setting-key-' + key).addClass('hidden');
+        $('input.setting-key-' + key).removeClass('hidden');
+
+        $('span.setting-value-' + key).addClass('hidden');
+        $('input.setting-value-' + key).removeClass('hidden');
+
+        var settingKey = $('span.setting-key-' + key).text();
+        $('input.setting-key-' + key).val(settingKey);
+
+        var settingValue = $('span.setting-value-' + key).text();
+        $('input.setting-value-' + key).val(settingValue);
+    }
+
+    function saveChanges(key) {
+
+        $('#setting-row-' + key + ' .edit').show();
+        //$('#setting-row-' + key + ' .delete').show();
+        $('#setting-row-' + key + ' .save').hide();
+        $('#setting-row-' + key + ' .cancel').hide();
+
+        $('span.setting-key-' + key).removeClass('hidden');
+        $('input.setting-key-' + key).addClass('hidden');
+
+        $('span.setting-value-' + key).removeClass('hidden');
+        $('input.setting-value-' + key).addClass('hidden');
+
+        var settingKey = $('input.setting-key-' + key).val();
+        if (settingKey) {
+            $('span.setting-key-' + key).text(settingKey);
+        }
+
+        var settingValue = $('input.setting-value-' + key).val();
+        if (settingValue) {
+            $('span.setting-value-' + key).text(settingValue);
+        }
+    }
+
+    function cancelEdit(key) {
+
+        $('#setting-row-' + key + ' .edit').show();
+        //$('#setting-row-' + key + ' .delete').show();
+        $('#setting-row-' + key + ' .save').hide();
+        $('#setting-row-' + key + ' .cancel').hide();
+
+        $('span.setting-key-' + key).removeClass('hidden');
+        $('input.setting-key-' + key).addClass('hidden');
+
+        $('span.setting-value-' + key).removeClass('hidden');
+        $('input.setting-value-' + key).addClass('hidden');
     }
 
 </script>

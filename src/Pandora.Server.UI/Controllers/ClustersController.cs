@@ -124,17 +124,10 @@ namespace Elders.Pandora.Server.UI.Controllers
         }
 
         [HttpPost]
-        public ActionResult ChangeSetting(ConfigurationDTO.SettingDTO oldSetting, ConfigurationDTO.SettingDTO newSetting)
-        {
-
-            return RedirectToAction("Index");
-        }
-
-        [HttpPost]
-        public ActionResult Defaults(string projectName, string applicationName, Dictionary<string, string> config)
+        public ActionResult Defaults(string projectName, string applicationName, ConfigurationDTO.Settings config)
         {
             var hostName = ApplicationConfiguration.Get("pandora_api_url");
-            if (config.ContainsKey("controller"))
+            if (config.Any(x => x.Key == "controller"))
                 return RedirectToAction("Index");
 
             var url = hostName + "/api/Defaults/" + projectName + "/" + applicationName;
@@ -144,7 +137,8 @@ namespace Elders.Pandora.Server.UI.Controllers
             request.RequestFormat = RestSharp.DataFormat.Json;
             request.AddHeader("Content-Type", "application/json");
             request.AddHeader("Authorization", "Bearer " + User.IdToken());
-            request.AddBody(config);
+            var body = config.ToDictionary(x => x.Key, x => x.Value);
+            request.AddBody(body);
 
             var response = client.Execute(request);
 
@@ -154,6 +148,16 @@ namespace Elders.Pandora.Server.UI.Controllers
             }
 
             return RedirectToAction("Index");
+        }
+
+        [HttpGet]
+        public ActionResult GetSettingRow(string key, string value, int index)
+        {
+            var setting = new ConfigurationDTO.SettingDTO(key, value);
+
+            ViewData["index"] = index;
+
+            return PartialView("EditorTemplates/SettingEditor", setting);
         }
     }
 }

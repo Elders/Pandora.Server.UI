@@ -1,0 +1,29 @@
+﻿@model ConfigurationDTO.SettingDTO
+
+<tr id="setting-row-@Model.Key">
+    <td class="col-md-5">
+        <input class="hidden form-control setting-key-@(Model.Key)" type="text" name="config[@(ViewData["index"])].Key" value="@(Model.Key)" />
+        <span class="setting-key-@(Model.Key)">@Model.Key</span>
+    </td>
+    <td class="col-md-6">
+        <input class="hidden form-control setting-value-@(Model.Key)" type="text" name="config[@(ViewData["index"])].Value" value="@(Model.Value)" />
+        <span class="setting-value-@(Model.Key)">@Model.Value</span>
+    </td>
+    <td class="col-md-1 actions">
+        <a href="#" class="edit pull-left @(ViewData["IsDisabled"])"
+           onclick="editDefaultValue('@(Model.Key)')">
+            <i class="fa fa-pencil"></i>
+        </a>
+        @*<a href="#" class="delete pull-left @(ViewData["IsDisabled"])">
+                <i class="fa fa-trash"></i>
+            </a>*@
+        <a style="display:none;" href="#" class="save pull-left @(ViewData["IsDisabled"])"
+           onclick="saveChanges('@(Model.Key)')">
+            <i class="fa fa-save"></i>
+        </a>
+        <a style="display:none;" href="#" class="cancel pull-left @(ViewData["IsDisabled"])"
+           onclick="cancelEdit('@(Model.Key)')">
+            <i class="fa fa-close"></i>
+        </a>
+    </td>
+</tr>

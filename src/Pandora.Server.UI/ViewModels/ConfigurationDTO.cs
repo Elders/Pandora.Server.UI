@@ -142,6 +142,10 @@ namespace Elders.Pandora.Server.UI.ViewModels
 
         public class SettingDTO
         {
+            public SettingDTO()
+            {
+            }
+
             public SettingDTO(string key, string value)
             {
                 if (string.IsNullOrWhiteSpace(key)) throw new ArgumentNullException(nameof(key));
