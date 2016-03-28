@@ -37,7 +37,7 @@
     <div class="modal-dialog modal-lg">
         <div class="modal-content">
             <div class="modal-header">
-                <button type="button" id="defaultsModalClose" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+                <button type="button" id="addSettingModalClose" class="close" data-dismiss="modal" aria-hidden="true">×</button>
                 <h4 class="modal-title">Add Default Setting</h4>
             </div>
             <div class="modal-body">
@@ -64,85 +64,85 @@
 </div>
 
 <div class="row">
-    <div class="row">
-        <div class="col-lg-12">
-            <div class="form-group">
-                <h2>@Model.ApplicationName</h2>
-            </div>
+    <div class="col-md-12">
+        <div class="row">
+            <h2>@Model.ApplicationName</h2>
         </div>
-    </div>
-    <hr />
-    <div class="col-md-9">
-        <form action="@(HttpContextAccessor.HttpContext.Request.Path)/Defaults" method="post" class="col-md-12">
-            <div class="row">
-                <h4 class="pull-left">Defaults</h4>
-            </div>
-            <div class="row">
-                @if (ReferenceEquals(null, Model.Defaults.Settings) == false)
-                {
-                    <div class="table-responsive">
-                        <table id="defaults-table" class="table table-hover">
-                            <thead>
-                                <tr>
-                                    <th>Key</th>
-                                    <th>Value</th>
-                                    <th>Actions</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                @for (var i = 0; i < Model.Defaults.Settings.Count; ++i)
-                                {
-                                    @Html.EditorFor(x => x.Defaults.Settings[i],
+        <hr />
+        <div class="col-md-9">
+            <form action="@(HttpContextAccessor.HttpContext.Request.Path)/Defaults" method="post" class="col-md-12">
+                <div class="row">
+                    <h4 class="pull-left">Default settings</h4>
+                </div>
+                <div class="row">
+                    @if (ReferenceEquals(null, Model.Defaults.Settings) == false)
+                    {
+                        <div class="table-responsive">
+                            <table id="settings-table" class="table table-hover">
+                                <thead>
+                                    <tr>
+                                        <th>Key</th>
+                                        <th>Value</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @for (var i = 0; i < Model.Defaults.Settings.Count; ++i)
+                                    {
+                                        @Html.EditorFor(x => x.Defaults.Settings[i],
                                         "SettingEditor",
                                         new
                                         {
                                             index = i,
                                             IsDisabled = Model.Defaults.Application.Access.HasAccess(Access.WriteAccess) ? string.Empty : "disabled"
                                         })
-                                }
-                            </tbody>
-                        </table>
+                                    }
+                                </tbody>
+                            </table>
 
-                        @if (Model.Defaults.Application.Access.HasAccess(Access.WriteAccess))
-                        {
-                            <a class="pull-left btn btn-primary btn-circle" href="#" data-toggle="modal" data-target="#defaultsModal">
-                                Add new
-                            </a>
-                        }
-                    </div>
+                            @if (Model.Defaults.Application.Access.HasAccess(Access.WriteAccess))
+                            {
+                                <a class="pull-left btn btn-primary btn-circle" href="#" data-toggle="modal" data-target="#defaultsModal">
+                                    Add new
+                                </a>
+                            }
+                        </div>
+                    }
+                </div>
+                <hr />
+                @if (Model.Defaults.Application.Access.HasAccess(Access.WriteAccess))
+                {
+                    <input class="btn btn-success row" type="submit" name="submit" value="Save" />
                 }
-            </div>
-            <hr />
-            @if (Model.Defaults.Application.Access.HasAccess(Access.WriteAccess))
-            {
-                <input class="btn btn-success row" type="submit" name="submit" value="Save" />
-            }
-        </form>
-    </div>
-
-    <div class="col-sm-3 pull-right">
-        <div class="row">
-            <h4 class="pull-left">Clusters</h4>
+            </form>
         </div>
 
-        @if (ReferenceEquals(null, Model.Clusters) == false)
-        {
-            <div class="row list-group">
-                @foreach (var cluster in Model.Clusters)
-                {
-                    <a class="list-group-item" href="~/Projects/@(Model.ProjectName)/@(Model.ApplicationName)/@(cluster.Cluster.Name)/Machines">
-                        @cluster.Cluster.Name
-                    </a>
-                }
+        <div class="col-sm-3 pull-right">
+            <div class="row">
+                <h4 class="pull-left">Clusters</h4>
             </div>
-        }
 
-        @if (Model.Defaults.Application.Access.HasAccess(Access.WriteAccess))
-        {
-            <a class="row btn btn-primary btn-circle" href="#" data-toggle="modal" data-target="#clusterModal">
-                Add new
-            </a>
-        }
+            @if (ReferenceEquals(null, Model.Clusters) == false)
+            {
+                <ul class="row list-group">
+                    @foreach (var cluster in Model.Clusters)
+                    {
+                        <li class="list-group-item">
+                            <a href="~/Projects/@(Model.ProjectName)/@(Model.ApplicationName)/@(cluster.Cluster.Name)/Machines">
+                                @cluster.Cluster.Name
+                            </a>
+                        </li>
+                    }
+                </ul>
+            }
+
+            @if (Model.Defaults.Application.Access.HasAccess(Access.WriteAccess))
+            {
+                <a class="row btn btn-primary" href="#" data-toggle="modal" data-target="#clusterModal">
+                    Add new
+                </a>
+            }
+        </div>
     </div>
 </div>
 
@@ -154,7 +154,7 @@
 
         if (settingName && settingValue) {
 
-            var currentIndex = $("#defaults-table tbody tr").length;
+            var currentIndex = $("#settings-table tbody tr").length;
             var html = '';
             $.get("/Clusters/GetSettingRow", {
                 key: settingName,
@@ -162,72 +162,13 @@
                 index: currentIndex
             }, function (data, status) {
                 if (status === 'success') {
-                    $("#defaults-table tbody tr").last().after(data);
+                    $("#settings-table tbody tr").last().after(data);
                 }
 
-                $('#defaultsModalClose').click();
+                $('#addSettingModalClose').click();
                 $('#settingName').val('');
                 $('#settingValue').val('');
             });
         }
     }
-
-    function editDefaultValue(key) {
-
-        $('#setting-row-' + key + ' .edit').hide();
-        //$('#setting-row-' + key + ' .delete').hide();
-        $('#setting-row-' + key + ' .save').show();
-        $('#setting-row-' + key + ' .cancel').show();
-
-        $('span.setting-key-' + key).addClass('hidden');
-        $('input.setting-key-' + key).removeClass('hidden');
-
-        $('span.setting-value-' + key).addClass('hidden');
-        $('input.setting-value-' + key).removeClass('hidden');
-
-        var settingKey = $('span.setting-key-' + key).text();
-        $('input.setting-key-' + key).val(settingKey);
-
-        var settingValue = $('span.setting-value-' + key).text();
-        $('input.setting-value-' + key).val(settingValue);
-    }
-
-    function saveChanges(key) {
-
-        $('#setting-row-' + key + ' .edit').show();
-        //$('#setting-row-' + key + ' .delete').show();
-        $('#setting-row-' + key + ' .save').hide();
-        $('#setting-row-' + key + ' .cancel').hide();
-
-        $('span.setting-key-' + key).removeClass('hidden');
-        $('input.setting-key-' + key).addClass('hidden');
-
-        $('span.setting-value-' + key).removeClass('hidden');
-        $('input.setting-value-' + key).addClass('hidden');
-
-        var settingKey = $('input.setting-key-' + key).val();
-        if (settingKey) {
-            $('span.setting-key-' + key).text(settingKey);
-        }
-
-        var settingValue = $('input.setting-value-' + key).val();
-        if (settingValue) {
-            $('span.setting-value-' + key).text(settingValue);
-        }
-    }
-
-    function cancelEdit(key) {
-
-        $('#setting-row-' + key + ' .edit').show();
-        //$('#setting-row-' + key + ' .delete').show();
-        $('#setting-row-' + key + ' .save').hide();
-        $('#setting-row-' + key + ' .cancel').hide();
-
-        $('span.setting-key-' + key).removeClass('hidden');
-        $('input.setting-key-' + key).addClass('hidden');
-
-        $('span.setting-value-' + key).removeClass('hidden');
-        $('input.setting-value-' + key).addClass('hidden');
-    }
-
 </script>

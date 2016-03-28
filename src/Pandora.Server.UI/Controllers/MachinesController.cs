@@ -103,10 +103,10 @@ namespace Elders.Pandora.Server.UI.Controllers
         }
 
         [HttpPost]
-        public ActionResult Index(string projectName, string applicationName, string clusterName, Dictionary<string, string> config)
+        public ActionResult Index(string projectName, string applicationName, string clusterName, ConfigurationDTO.Settings config)
         {
             var hostName = ApplicationConfiguration.Get("pandora_api_url");
-            if (config.ContainsKey("controller"))
+            if (config.Any(x => x.Key == "controller"))
                 return RedirectToAction("Index");
 
             var url = hostName + "/api/Clusters/" + projectName + "/" + applicationName + "/" + clusterName;
@@ -117,7 +117,8 @@ namespace Elders.Pandora.Server.UI.Controllers
             request.AddHeader("Content-Type", "application/json");
             request.AddHeader("Authorization", "Bearer " + User.IdToken());
 
-            request.AddBody(JsonConvert.SerializeObject(config));
+            var body = config.ToDictionary(x => x.Key, x => x.Value);
+            request.AddBody(JsonConvert.SerializeObject(body));
 
             var response = client.Execute(request);
 
@@ -179,10 +180,10 @@ namespace Elders.Pandora.Server.UI.Controllers
         }
 
         [HttpPost]
-        public ActionResult Machine(string projectName, string applicationName, string clusterName, string machineName, Dictionary<string, string> config)
+        public ActionResult Machine(string projectName, string applicationName, string clusterName, string machineName, ConfigurationDTO.Settings config)
         {
             var hostName = ApplicationConfiguration.Get("pandora_api_url");
-            if (config.ContainsKey("controller"))
+            if (config.Any(x => x.Key == "controller"))
                 return RedirectToAction("Index");
 
             var url = hostName + "/api/Machines/" + projectName + "/" + applicationName + "/" + machineName;
@@ -193,7 +194,8 @@ namespace Elders.Pandora.Server.UI.Controllers
             request.AddHeader("Content-Type", "application/json");
             request.AddHeader("Authorization", "Bearer " + User.IdToken());
 
-            request.AddBody(JsonConvert.SerializeObject(config));
+            var body = config.ToDictionary(x => x.Key, x => x.Value);
+            request.AddBody(JsonConvert.SerializeObject(body));
 
             var response = client.Execute(request);
 
