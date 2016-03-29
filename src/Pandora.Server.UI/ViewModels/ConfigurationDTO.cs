@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
 
 namespace Elders.Pandora.Server.UI.ViewModels
@@ -44,7 +43,7 @@ namespace Elders.Pandora.Server.UI.ViewModels
 
         public class MachineDTO
         {
-            public MachineDTO(string name, Cluster cluster, Settings settings)
+            public MachineDTO(string name, Cluster cluster, Dictionary<string, string> settings)
             {
                 Name = name;
                 Cluster = cluster;
@@ -55,7 +54,7 @@ namespace Elders.Pandora.Server.UI.ViewModels
 
             public Cluster Cluster { get; set; }
 
-            public Settings Settings { get; set; }
+            public Dictionary<string, string> Settings { get; set; }
 
             public string this[string settingKey]
             {
@@ -68,7 +67,7 @@ namespace Elders.Pandora.Server.UI.ViewModels
 
         public class ClusterDTO
         {
-            public ClusterDTO(Cluster cluster, Settings settings)
+            public ClusterDTO(Cluster cluster, Dictionary<string, string> settings)
             {
                 Cluster = cluster;
                 Settings = settings;
@@ -76,7 +75,7 @@ namespace Elders.Pandora.Server.UI.ViewModels
 
             public Cluster Cluster { get; set; }
 
-            public Settings Settings { get; set; }
+            public Dictionary<string, string> Settings { get; set; }
 
             public string this[string settingKey]
             {
@@ -89,7 +88,7 @@ namespace Elders.Pandora.Server.UI.ViewModels
 
         public class DefaultsDTO
         {
-            public DefaultsDTO(Application application, Settings settings)
+            public DefaultsDTO(Application application, Dictionary<string, string> settings)
             {
                 Application = application;
                 Settings = settings;
@@ -97,7 +96,7 @@ namespace Elders.Pandora.Server.UI.ViewModels
 
             public Application Application { get; set; }
 
-            public Settings Settings { get; set; }
+            public Dictionary<string, string> Settings { get; set; }
 
             public string this[string settingKey]
             {
@@ -106,57 +105,6 @@ namespace Elders.Pandora.Server.UI.ViewModels
                     return Settings[settingKey.ToLowerInvariant()];
                 }
             }
-        }
-
-        public class Settings : List<SettingDTO>
-        {
-            public Settings() : base()
-            {
-            }
-
-            public Settings(IEnumerable<SettingDTO> settings) : base(settings)
-            {
-            }
-
-            public bool TryGetSetting(string key, out SettingDTO setting)
-            {
-                setting = this.SingleOrDefault(x => x.Key == key);
-
-                if (ReferenceEquals(null, setting)) return false;
-
-                return true;
-            }
-
-            public string this[string settingKey]
-            {
-                get
-                {
-                    SettingDTO setting;
-                    if (TryGetSetting(settingKey, out setting) == false)
-                        throw new KeyNotFoundException($"Element with key '{settingKey}' was not found");
-
-                    return setting.Value;
-                }
-            }
-        }
-
-        public class SettingDTO
-        {
-            public SettingDTO()
-            {
-            }
-
-            public SettingDTO(string key, string value)
-            {
-                if (string.IsNullOrWhiteSpace(key)) throw new ArgumentNullException(nameof(key));
-
-                Key = key;
-                Value = value;
-            }
-
-            public string Key { get; set; }
-
-            public string Value { get; set; }
         }
     }
 }

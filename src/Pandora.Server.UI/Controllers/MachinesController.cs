@@ -28,7 +28,7 @@ namespace Elders.Pandora.Server.UI.Controllers
                 ProjectName = projectName,
                 ApplicationName = applicationName,
                 Clusters = new List<ConfigurationDTO.ClusterDTO> { new ConfigurationDTO.ClusterDTO(new Cluster(clusterName, Access.WriteAccess), clusterSettings) },
-                Machines = new List<ConfigurationDTO.MachineDTO>(machines.Select(x => new ConfigurationDTO.MachineDTO(x, new Cluster(clusterName, Access.WriteAccess), new ConfigurationDTO.Settings())))
+                Machines = new List<ConfigurationDTO.MachineDTO>(machines.Select(x => new ConfigurationDTO.MachineDTO(x, new Cluster(clusterName, Access.WriteAccess), new Dictionary<string, string>())))
             };
 
             return View(new Tuple<string, ConfigurationDTO>(clusterName, config));
@@ -56,7 +56,7 @@ namespace Elders.Pandora.Server.UI.Controllers
             return machines;
         }
 
-        private ConfigurationDTO.Settings GetMachineSettings(string projectName, string applicationName, string clusterName, string machineName)
+        private Dictionary<string, string> GetMachineSettings(string projectName, string applicationName, string clusterName, string machineName)
         {
             var hostName = ApplicationConfiguration.Get("pandora_api_url");
             var url = hostName + "/api/Machines/" + projectName + "/" + applicationName + "/" + clusterName + "/" + machineName;
@@ -73,13 +73,12 @@ namespace Elders.Pandora.Server.UI.Controllers
                 throw response.ErrorException;
             }
 
-            var config = JsonConvert.DeserializeObject<Dictionary<string, string>>(response.Content)
-                .Select(x => new ConfigurationDTO.SettingDTO(x.Key, x.Value));
+            var config = JsonConvert.DeserializeObject<Dictionary<string, string>>(response.Content);
 
-            return new ConfigurationDTO.Settings(config);
+            return config;
         }
 
-        private ConfigurationDTO.Settings GetClusterSettings(string projectName, string applicationName, string clusterName)
+        private Dictionary<string, string> GetClusterSettings(string projectName, string applicationName, string clusterName)
         {
             var hostName = ApplicationConfiguration.Get("pandora_api_url");
             var url = hostName + "/api/Clusters/" + projectName + "/" + applicationName + "/" + clusterName;
@@ -96,17 +95,16 @@ namespace Elders.Pandora.Server.UI.Controllers
                 throw response.ErrorException;
             }
 
-            var config = JsonConvert.DeserializeObject<Dictionary<string, string>>(response.Content)
-                .Select(x => new ConfigurationDTO.SettingDTO(x.Key, x.Value));
+            var config = JsonConvert.DeserializeObject<Dictionary<string, string>>(response.Content);
 
-            return new ConfigurationDTO.Settings(config);
+            return config;
         }
 
         [HttpPost]
-        public ActionResult Index(string projectName, string applicationName, string clusterName, ConfigurationDTO.Settings config)
+        public ActionResult Index(string projectName, string applicationName, string clusterName, Dictionary<string, string> config)
         {
             var hostName = ApplicationConfiguration.Get("pandora_api_url");
-            if (config.Any(x => x.Key == "controller"))
+            if (config.ContainsKey("controller"))
                 return RedirectToAction("Index");
 
             var url = hostName + "/api/Clusters/" + projectName + "/" + applicationName + "/" + clusterName;
@@ -117,8 +115,7 @@ namespace Elders.Pandora.Server.UI.Controllers
             request.AddHeader("Content-Type", "application/json");
             request.AddHeader("Authorization", "Bearer " + User.IdToken());
 
-            var body = config.ToDictionary(x => x.Key, x => x.Value);
-            request.AddBody(JsonConvert.SerializeObject(body));
+            request.AddBody(JsonConvert.SerializeObject(config));
 
             var response = client.Execute(request);
 
@@ -172,7 +169,7 @@ namespace Elders.Pandora.Server.UI.Controllers
             {
                 ProjectName = projectName,
                 ApplicationName = applicationName,
-                Clusters = new List<ConfigurationDTO.ClusterDTO> { new ConfigurationDTO.ClusterDTO(new Cluster(clusterName, Access.WriteAccess), new ConfigurationDTO.Settings()) },
+                Clusters = new List<ConfigurationDTO.ClusterDTO> { new ConfigurationDTO.ClusterDTO(new Cluster(clusterName, Access.WriteAccess), new Dictionary<string, string>()) },
                 Machines = new List<ConfigurationDTO.MachineDTO> { new ConfigurationDTO.MachineDTO(machineName, new Cluster(clusterName, Access.WriteAccess), machineSettings) }
             };
 
@@ -180,7 +177,7 @@ namespace Elders.Pandora.Server.UI.Controllers
         }
 
         [HttpPost]
-        public ActionResult Machine(string projectName, string applicationName, string clusterName, string machineName, ConfigurationDTO.Settings config)
+        public ActionResult Machine(string projectName, string applicationName, string clusterName, string machineName, Dictionary<string, string> config)
         {
             var hostName = ApplicationConfiguration.Get("pandora_api_url");
             if (config.Any(x => x.Key == "controller"))
@@ -194,8 +191,7 @@ namespace Elders.Pandora.Server.UI.Controllers
             request.AddHeader("Content-Type", "application/json");
             request.AddHeader("Authorization", "Bearer " + User.IdToken());
 
-            var body = config.ToDictionary(x => x.Key, x => x.Value);
-            request.AddBody(JsonConvert.SerializeObject(body));
+            request.AddBody(JsonConvert.SerializeObject(config));
 
             var response = client.Execute(request);
 

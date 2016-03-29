@@ -30,7 +30,7 @@ namespace Elders.Pandora.Server.UI.Controllers
 
             if (ReferenceEquals(null, clusterNames) == false)
             {
-                config.Clusters = new List<ConfigurationDTO.ClusterDTO>(clusterNames.Select(x => new ConfigurationDTO.ClusterDTO(new ViewModels.Cluster(x, Access.WriteAccess), new ConfigurationDTO.Settings())));
+                config.Clusters = new List<ConfigurationDTO.ClusterDTO>(clusterNames.Select(x => new ConfigurationDTO.ClusterDTO(new ViewModels.Cluster(x, Access.WriteAccess), new Dictionary<string, string>())));
             }
 
             return View(config);
@@ -60,7 +60,7 @@ namespace Elders.Pandora.Server.UI.Controllers
             return config;
         }
 
-        private ConfigurationDTO.Settings GetDefaultSettings(string projectName, string applicationName)
+        private Dictionary<string, string> GetDefaultSettings(string projectName, string applicationName)
         {
             var hostName = ApplicationConfiguration.Get("pandora_api_url");
 
@@ -79,17 +79,16 @@ namespace Elders.Pandora.Server.UI.Controllers
                 throw response.ErrorException;
             }
 
-            var config = JsonConvert.DeserializeObject<Dictionary<string, string>>(response.Content)
-                .Select(x => new ConfigurationDTO.SettingDTO(x.Key, x.Value));
+            var config = JsonConvert.DeserializeObject<Dictionary<string, string>>(response.Content);
 
-            return new ConfigurationDTO.Settings(config);
+            return config;
         }
 
         [HttpPost]
         public ActionResult Index(string projectName, string applicationName, string clusterName)
         {
             var hostName = ApplicationConfiguration.Get("pandora_api_url");
-            var newCluster = new Elders.Pandora.Box.Cluster(clusterName, new Dictionary<string, string>());
+            var newCluster = new Box.Cluster(clusterName, new Dictionary<string, string>());
 
             var url = hostName + "/api/Clusters/" + projectName + "/" + applicationName + "/" + clusterName;
 
@@ -117,17 +116,17 @@ namespace Elders.Pandora.Server.UI.Controllers
                 ProjectName = projectName,
                 ApplicationName = applicationName,
                 Defaults = new ConfigurationDTO.DefaultsDTO(new Application() { Access = Access.WriteAccess }, defaultSettings),
-                Clusters = new List<ConfigurationDTO.ClusterDTO>(clusterNames.Select(x => new ConfigurationDTO.ClusterDTO(new ViewModels.Cluster(x, Access.WriteAccess), new ConfigurationDTO.Settings())))
+                Clusters = new List<ConfigurationDTO.ClusterDTO>(clusterNames.Select(x => new ConfigurationDTO.ClusterDTO(new ViewModels.Cluster(x, Access.WriteAccess), new Dictionary<string, string>())))
             };
 
             return View(config);
         }
 
         [HttpPost]
-        public ActionResult Defaults(string projectName, string applicationName, ConfigurationDTO.Settings config)
+        public ActionResult Defaults(string projectName, string applicationName, Dictionary<string, string> config)
         {
             var hostName = ApplicationConfiguration.Get("pandora_api_url");
-            if (config.Any(x => x.Key == "controller"))
+            if (config.ContainsKey("controller"))
                 return RedirectToAction("Index");
 
             var url = hostName + "/api/Defaults/" + projectName + "/" + applicationName;
@@ -137,8 +136,7 @@ namespace Elders.Pandora.Server.UI.Controllers
             request.RequestFormat = RestSharp.DataFormat.Json;
             request.AddHeader("Content-Type", "application/json");
             request.AddHeader("Authorization", "Bearer " + User.IdToken());
-            var body = config.ToDictionary(x => x.Key, x => x.Value);
-            request.AddBody(body);
+            request.AddBody(config);
 
             var response = client.Execute(request);
 
@@ -151,11 +149,9 @@ namespace Elders.Pandora.Server.UI.Controllers
         }
 
         [HttpGet]
-        public ActionResult GetSettingRow(string key, string value, int index)
+        public ActionResult GetSettingRow(string key, string value)
         {
-            var setting = new ConfigurationDTO.SettingDTO(key, value);
-
-            ViewData["index"] = index;
+            var setting = new KeyValuePair<string, string>(key, value);
 
             return PartialView("EditorTemplates/SettingEditor", setting);
         }

@@ -55,13 +55,12 @@
                             </tr>
                         </thead>
                         <tbody>
-                            @for (var i = 0; i < cluster.Settings.Count; i++)
+                            @foreach (var setting in cluster.Settings)
                             {
-                                @Html.EditorFor(x => cluster.Settings[i],
+                                @Html.EditorFor(x => setting,
                                         "SettingEditor",
                                         new
                                         {
-                                            index = i,
                                             IsDisabled = cluster.Cluster.Access.HasAccess(Access.WriteAccess) ? string.Empty : "disabled",
                                             CanEditKey = false
                                         })

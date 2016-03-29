@@ -87,13 +87,12 @@
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    @for (var i = 0; i < Model.Defaults.Settings.Count; ++i)
+                                    @foreach (var setting in Model.Defaults.Settings)
                                     {
-                                        @Html.EditorFor(x => x.Defaults.Settings[i],
+                                        @Html.EditorFor(x => setting,
                                         "SettingEditor",
                                         new
                                         {
-                                            index = i,
                                             IsDisabled = Model.Defaults.Application.Access.HasAccess(Access.WriteAccess) ? string.Empty : "disabled"
                                         })
                                     }
@@ -126,7 +125,7 @@
             {
                 <ul class="row list-group">
                     @foreach (var cluster in Model.Clusters)
-                    {
+                {
                         <li class="list-group-item">
                             <a href="~/Projects/@(Model.ProjectName)/@(Model.ApplicationName)/@(cluster.Cluster.Name)/Machines">
                                 @cluster.Cluster.Name

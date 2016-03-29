@@ -1,4 +1,4 @@
-﻿@model ConfigurationDTO.SettingDTO
+﻿@model KeyValuePair<string, string>
 
 @{
     var canEditKeys = !ViewData.ContainsKey("CanEditKey") || (bool)ViewData["CanEditKey"];
@@ -8,17 +8,17 @@
     <td class="col-md-5">
         @if (canEditKeys)
         {
-            <input class="hidden form-control setting-key-@(Model.Key)" type="text" name="config[@(ViewData["index"])].Key" value="@(Model.Key)" />
+            <input class="hidden form-control setting-key-@(Model.Key)" type="text" value="@(Model.Key)" />
             <span class="setting-key-@(Model.Key)">@Model.Key</span>
         }
         else {
             @Model.Key
-            <input type="hidden" name="config[@(ViewData["index"])].Key" value="@(Model.Key)" />
+            @*<input type="hidden" name="config[@(Model.Key)].Key" value="@(Model.Key)" />*@
         }
     </td>
 
     <td class="col-md-6">
-        <input class="hidden form-control setting-value-@(Model.Key)" type="text" name="config[@(ViewData["index"])].Value" value="@(Model.Value)" />
+        <input class="hidden form-control setting-value-@(Model.Key)" type="text" name="config[@(Model.Key)]" value="@(Model.Value)" />
         <span class="setting-value-@(Model.Key)">@Model.Value</span>
     </td>
     <td class="col-md-1 actions">

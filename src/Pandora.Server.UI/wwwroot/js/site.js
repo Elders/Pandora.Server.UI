@@ -35,6 +35,7 @@ function saveChanges(key) {
 
     var settingKey = $('input.setting-key-' + key).val();
     if (settingKey) {
+        $('input.setting-value-' + key).attr('name', 'config[' + settingKey + ']');
         $('span.setting-key-' + key).text(settingKey);
     }
 
